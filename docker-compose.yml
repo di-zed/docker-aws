@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+
+  linux:
+    container_name: linux-aws
+    build: ./images/linux
+    command: node server.js
+    hostname: docker-linux
+    volumes:
+      - ${VOL_ETC_INPUTRC}:${DIST_ETC_INPUTRC}:cached # Autocomplete functionality to the Terminal
+      - ${VOL_PROJECTS}:${DIST_PROJECTS}:delegated
+      - ${VOL_ROOT_BASH_HISTORY_AWS}:${DIST_ROOT_BASH_HISTORY}:delegated
+      - ${VOL_SSH_AUTH_SOCK}:${DIST_SSH_AUTH_SOCK}:cached # Forward local machine SSH key to the Docker
+      - ~/.ssh:/root/.ssh:cached
+      - ./mounted:/home/mounted
+      - ./volumes/home/aws/ec2:/home/aws/ec2:cached
+      - ./volumes/home/aws/iam:/home/aws/iam:cached
+      - ./volumes/root/.aws:/root/.aws:delegated
+    environment:
+      SSH_AUTH_SOCK: ${VOL_SSH_AUTH_SOCK}
+    working_dir: ${DIST_PROJECTS}
+    networks:
+      - internal
+
+networks:
+
+  internal:
+    driver: bridge
